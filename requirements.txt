@@ -3,5 +3,8 @@ jaxlib
 flax
 optax
 tensorflow-datasets
+tensorflow
+torchvision
+torch
 matplotlib
 numpy

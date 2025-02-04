@@ -30,3 +30,6 @@ jax_debug.log
 # System files
 .DS_Store
 Thumbs.db
+
+# data
+data/images/
