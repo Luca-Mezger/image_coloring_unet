@@ -8,7 +8,7 @@ from PIL import Image
 # Configuration options
 DATASET_NAME = "STL10"  # Options: "STL10", "CelebA", "ImageNet"
 SAVE_FOLDER = "./data/images"  # Folder to save images
-NUM_IMAGES = 100  # Set number of images (None for all)
+NUM_IMAGES = 3000  # Set number of images (None for all)
 IMG_SIZE = (512, 512)  # Desired resolution
 
 # Create save folder if not exists
