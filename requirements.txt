@@ -8,4 +8,4 @@ torchvision
 torch
 matplotlib
 numpy
-tqdm 
+tqdm

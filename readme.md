@@ -14,3 +14,8 @@ python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
+
+## Usage
+You need sufficiently powerful hardware to train the model.
+1. run get_images.py
+2. run main.py
