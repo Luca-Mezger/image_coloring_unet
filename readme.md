@@ -2,7 +2,7 @@
 
 A UNet implementation for automatic image colorization using JAX and Flax.
 
-## Setup Instructions
+## Setup Instructions (Training)
 
 ### Windows
 - Run `setup.bat` (double-click it or execute via Command Prompt). This will create a virtual environment and install all dependencies.
@@ -35,3 +35,4 @@ python main.py --batch_size 16 --img_size 128 --epochs 20 --learning_rate 0.0005
 python main.py --help
 ```
 
+## Setup Instructions (Inference)
