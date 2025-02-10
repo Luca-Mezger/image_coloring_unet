@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ```
 
 ### Usage
-You need sufficiently powerful hardware to train the model.
+You need sufficiently powerful hardware to train the model effectively.
 1. run get_images.py
 You can specify the parameters either through the get_images.py file directly or through argparse:
 ```bash
@@ -36,3 +36,9 @@ python main.py --help
 ```
 
 ## Setup Instructions (Inference)
+```bash
+python inference.py --checkpoint checkpoints/model.pkl --input test/image_4_black_white.png
+```
+```bash
+python inference.py --help
+```
