@@ -15,6 +15,7 @@ def load_dataset(batch_size=32, img_size=256, data_dir='data/images'):
     Returns:
         tf.data.Dataset: Yields batches of (grayscale, color) image pairs.
     """
+    print(f"Loading images from {data_dir}...")
     # Filter for valid image files
     valid_extensions = ('.jpg', '.jpeg', '.png')
     file_list = [
