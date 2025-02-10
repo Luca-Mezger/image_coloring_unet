@@ -2,7 +2,6 @@ import tensorflow as tf
 import os
 from tqdm import tqdm
 
-
 def load_dataset(batch_size=32, img_size=256, data_dir='data/images'):
     """
     Load images from a directory, resize them, and create (grayscale, color) pairs.
@@ -10,7 +9,7 @@ def load_dataset(batch_size=32, img_size=256, data_dir='data/images'):
     
     Args:
         batch_size (int): Number of images per batch.
-        img_size (int): Target height and width of images. Mimimum size is 32.
+        img_size (int): Target height and width of images. Minimum size is 32.
         data_dir (str): Directory containing image files.
     
     Returns:
@@ -35,9 +34,11 @@ def load_dataset(batch_size=32, img_size=256, data_dir='data/images'):
             except tf.errors.InvalidArgumentError:
                 print(f"Skipping file (not a valid image): {file_path}")
                 continue
-            # Resize and normalize the image.
+            # Resize and normalize the image to [0, 1]
             img = tf.image.resize(img, [img_size, img_size])
             img = tf.cast(img, tf.float32) / 255.0
+            # Scale image to [-1, 1]
+            img = img * 2.0 - 1.0
             # Convert the color image to grayscale.
             grayscale = tf.image.rgb_to_grayscale(img)
             yield grayscale, img

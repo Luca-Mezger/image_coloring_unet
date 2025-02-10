@@ -9,3 +9,5 @@ torch
 matplotlib
 numpy
 tqdm
+imageio
+scikit-image
