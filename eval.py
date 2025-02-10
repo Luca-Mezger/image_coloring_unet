@@ -15,10 +15,15 @@ def evaluate(state, config):
     total_loss = 0.0
     count = 0
     for batch in dataset:
-        grayscale, target = batch
-        pred = model.apply({'params': state.params}, grayscale)
-        loss = jnp.mean(jnp.abs(pred - target))
-        total_loss += loss
+        # Convert TensorFlow tensors to numpy arrays then to JAX arrays.
+        grayscale_np = batch[0].numpy()
+        target_np = batch[1].numpy()
+        grayscale_jax = jnp.array(grayscale_np)
+        target_jax = jnp.array(target_np)
+        
+        pred = model.apply({'params': state.params}, grayscale_jax)
+        loss = jnp.mean(jnp.abs(pred - target_jax))
+        total_loss += float(loss)
         count += 1
     avg_loss = total_loss / count
     print(f"Average Evaluation Loss: {avg_loss:.4f}")

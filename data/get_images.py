@@ -25,7 +25,7 @@ def main():
     )
     parser.add_argument(
         "--img_size", type=int, default=512,
-        help="Image resolution. Images are resized to (img_size, img_size)."
+        help="Image resolution. Images are resized to (img_size, img_size). Minimum size is 32."
     )
 
     args = parser.parse_args()

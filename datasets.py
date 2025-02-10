@@ -2,6 +2,7 @@ import tensorflow as tf
 import os
 from tqdm import tqdm
 
+
 def load_dataset(batch_size=32, img_size=256, data_dir='data/images'):
     """
     Load images from a directory, resize them, and create (grayscale, color) pairs.
@@ -9,7 +10,7 @@ def load_dataset(batch_size=32, img_size=256, data_dir='data/images'):
     
     Args:
         batch_size (int): Number of images per batch.
-        img_size (int): Target height and width of images.
+        img_size (int): Target height and width of images. Mimimum size is 32.
         data_dir (str): Directory containing image files.
     
     Returns:
@@ -51,4 +52,5 @@ def load_dataset(batch_size=32, img_size=256, data_dir='data/images'):
     dataset = dataset.shuffle(buffer_size=num_files)
     dataset = dataset.batch(batch_size)
     dataset = dataset.prefetch(tf.data.AUTOTUNE)
+    
     return dataset

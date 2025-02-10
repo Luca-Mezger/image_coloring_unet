@@ -1,20 +1,18 @@
 import os
-import pickle
+from flax import serialization
 
 def save_checkpoint(state, filepath):
-    """Save model state (parameters, optimizer state, etc.) to disk."""
     os.makedirs(os.path.dirname(filepath), exist_ok=True)
-    with open(filepath, 'wb') as f:
-        pickle.dump(state, f)
-    print(f"Checkpoint saved at {filepath}")
+    with open(filepath, "wb") as f:
+        f.write(serialization.to_bytes(state))
+    print(f"Checkpoint saved to {filepath}")
 
-def load_checkpoint(filepath):
-    """Load model state from a checkpoint file."""
+def load_checkpoint(state, filepath):
     if os.path.exists(filepath):
-        with open(filepath, 'rb') as f:
-            state = pickle.load(f)
+        with open(filepath, "rb") as f:
+            state = serialization.from_bytes(state, f.read())
         print(f"Checkpoint loaded from {filepath}")
         return state
     else:
         print(f"No checkpoint found at {filepath}")
-        return None
+        return state

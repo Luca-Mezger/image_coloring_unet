@@ -21,10 +21,10 @@ You need sufficiently powerful hardware to train the model.
 1. run get_images.py
 You can specify the parameters either through the get_images.py file directly or through argparse:
 ```bash
-python get_images.py --dataset STL10 --save_folder ./data/images --num_images 1000 --img_size 256
+python data/get_images.py --dataset STL10 --save_folder ./data/images --num_images 1000 --img_size 256
 ```
 ```bash
-python get_images.py --help
+python data/get_images.py --help
 ```
 2. run main.py
 You can specify the parameters either through the config.py file or through argparse:
