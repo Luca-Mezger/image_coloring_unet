@@ -16,7 +16,11 @@ chmod +x setup.sh
 
 ### Usage
 You need sufficiently powerful hardware to train the model effectively.
-1. run get_images.py
+1. Check if JAX recognises and is able to use your GPU. Training with a CPU is theoretically possible but no usable results will be achieved in reasonable time.
+```bash
+python check_jax_gpu.py
+```
+2. run get_images.py
 You can specify the parameters either through the get_images.py file directly or through argparse:
 ```bash
 python data/get_images.py --dataset STL10 --save_folder ./data/images --num_images 1000 --img_size 256
@@ -24,7 +28,7 @@ python data/get_images.py --dataset STL10 --save_folder ./data/images --num_imag
 ```bash
 python data/get_images.py --help
 ```
-2. run main.py
+3. run main.py
 You can specify the parameters either through the config.py file or through argparse:
 ```bash
 python main.py --batch_size 16 --img_size 128 --epochs 20 --learning_rate 0.0005 --seed 1234 --checkpoint_path checkpoints/new_model.pkl
