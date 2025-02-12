@@ -30,8 +30,10 @@ def main():
         config['seed'] = args.seed
     if args.checkpoint_path is not None:
         config['checkpoint_path'] = args.checkpoint_path
+    else:
+        config['checkpoint_path'] = f"{config['checkpoint_path']}_img{config['img_size']}_lr{config['learning_rate']}_bs{config['batch_size']}_epochs{config['epochs']}"
 
-    
+
     # Train, evaluate, and save the model.
     state = train(config)
     evaluate(state, config)
