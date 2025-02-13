@@ -39,7 +39,6 @@ def train(config):
 
     # Shuffle dataset before repeating (ensure load_dataset doesn't already shuffle)
     dataset = load_dataset(batch_size=config['batch_size'])
-    dataset = dataset.shuffle(1000).repeat()
     
     # Initialize model & training state
     model = create_model()
