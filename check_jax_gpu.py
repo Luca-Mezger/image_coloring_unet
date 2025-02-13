@@ -1,5 +1,8 @@
 import jax
 import jax.numpy as jnp
+import os
+os.environ["JAX_PLATFORM_NAME"] = "gpu"
+
 
 def check_jax_gpu():
     try:
