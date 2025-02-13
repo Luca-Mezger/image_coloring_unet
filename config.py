@@ -4,5 +4,5 @@ config = {
     'epochs': 10,
     'learning_rate': 1e-3,
     'seed': 42,
-    'checkpoint_path': 'checkpoints/model.pkl'
+    'checkpoint_path': 'checkpoints/model'
 }

@@ -28,7 +28,12 @@ python data/get_images.py --dataset STL10 --save_folder ./data/images --num_imag
 ```bash
 python data/get_images.py --help
 ```
-3. run main.py
+3. Optionally run enhance_saturation.py
+To reduce dullness of colors in the trained model you can enhance the saturation of all images in a folder and use it as the training folder:
+```bash
+python enhance_saturation.py --input_dir data/images --output_dir data/images_saturated --saturation 1.8
+```
+4. run main.py
 You can specify the parameters either through the config.py file or through argparse:
 ```bash
 python main.py --batch_size 16 --img_size 128 --epochs 20 --learning_rate 0.0005 --seed 1234 --checkpoint_path checkpoints/new_model.pkl
