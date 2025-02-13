@@ -19,7 +19,7 @@ def check_jax_gpu():
 
         # Run a simple computation
         print("Testing JAX computation...")
-        x = jnp.ones((1000, 1000))
+        x = jnp.ones((10000, 10000))
         y = jnp.dot(x, x)
         print("Computation successful!", y.shape)
 
