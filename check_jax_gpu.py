@@ -10,7 +10,7 @@ def check_jax_gpu():
         if gpu_available:
             print("✅ JAX is using GPU!")
         else:
-            print("❌ JAX is not using GPU. Running on CPU instead.")
+            print("❌ JAX is not using GPU. Running on CPU.")
 
         print("Devices:", devices)
 
