@@ -11,3 +11,4 @@ numpy
 tqdm
 imageio
 scikit-image
+Pillow
