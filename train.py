@@ -3,6 +3,7 @@ import math
 import jax
 import jax.numpy as jnp
 import optax
+import argparse
 from flax.training import train_state
 from model import create_model
 from datasets import load_dataset
@@ -73,11 +74,21 @@ def train(config):
     return state
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--batch_size", type=int, default=32, help="Batch size for training")
+    parser.add_argument("--img_size", type=int, default=256, help="Image size for training")
+    parser.add_argument("--epochs", type=int, default=10, help="Number of training epochs")
+    parser.add_argument("--learning_rate", type=float, default=1e-3, help="Learning rate")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+
+    args = parser.parse_args()
+
     config = {
-        'batch_size': 32,
-        'img_size': 256,
-        'epochs': 10,
-        'learning_rate': 1e-3,
-        'seed': 42
+        'batch_size': args.batch_size,
+        'img_size': args.img_size,
+        'epochs': args.epochs,
+        'learning_rate': args.learning_rate,
+        'seed': args.seed
     }
+
     train(config)
