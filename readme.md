@@ -4,6 +4,11 @@ A UNet implementation for automatic image colorization using JAX and Flax.
 
 ## Setup Instructions (Training)
 
+```bash
+git clone https://github.com/Luca-Mezger/image_coloring_unet.git
+cd image_coloring_unet
+```
+
 ### Windows
 - Run `setup.bat` (double-click it or execute via Command Prompt). This will create a virtual environment and install all dependencies.
 

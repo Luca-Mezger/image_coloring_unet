@@ -38,7 +38,6 @@ def train(config):
     ]
     total_batches = math.ceil(len(file_list) / config['batch_size'])
 
-    # Shuffle dataset before repeating (ensure load_dataset doesn't already shuffle)
     dataset = load_dataset(batch_size=config['batch_size'])
     
     # Initialize model & training state
