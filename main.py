@@ -1,3 +1,11 @@
+import os
+
+# Reduce JAX GPU memory usage
+os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"  # Disable preallocation
+os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.5"  # Use only 50% of available GPU memory
+os.environ["TF_FORCE_UNIFIED_MEMORY"] = "1"  # Allows memory sharing between CPU/GPU
+os.environ["XLA_FLAGS"] = "--xla_gpu_strict_conv_algorithm_picker=false"
+
 import argparse
 from train import train
 from eval import evaluate

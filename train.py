@@ -10,11 +10,6 @@ from datasets import load_dataset
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 
-# Disable JAX memory preallocation (prevents OOM errors)
-os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.8"
-os.environ["XLA_FLAGS"] = "--xla_gpu_strict_conv_algorithm_picker=false"
-
 class TrainState(train_state.TrainState):
     pass
 
