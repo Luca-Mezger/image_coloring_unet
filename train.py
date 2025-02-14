@@ -1,3 +1,4 @@
+import gc
 import os
 import math
 import jax
@@ -33,14 +34,14 @@ def train(config):
     ]
     total_batches = math.ceil(len(file_list) / config['batch_size'])
 
-    dataset = load_dataset(batch_size=config['batch_size'])
-    
+    dataset = load_dataset(batch_size=config['batch_size'], prefetch=False)  # Lazy loading
+
     # Initialize model & training state
     model = create_model()
     rng = jax.random.PRNGKey(config['seed'])
     rng, init_rng = jax.random.split(rng)
     input_shape = (1, config['img_size'], config['img_size'], 1)
-    params = model.init(init_rng, jnp.ones(input_shape))['params']
+    params = model.init(init_rng, jnp.ones(input_shape, dtype=jnp.float16))['params']  # Use float16
     tx = optax.adam(config['learning_rate'])
     state = TrainState.create(apply_fn=model.apply, params=params, tx=tx)
 
@@ -48,16 +49,21 @@ def train(config):
     for epoch in range(1, config['epochs'] + 1):
         epoch_loss, count = 0.0, 0
         for batch in tqdm(dataset.take(total_batches), desc=f"Epoch {epoch}", total=total_batches, unit="batch"):
-            # Efficient conversion to JAX arrays
-            batch_np = (jnp.asarray(batch[0]), jnp.asarray(batch[1]))
+            # Convert to float16 to reduce memory usage
+            batch_np = (jnp.asarray(batch[0], dtype=jnp.float16), jnp.asarray(batch[1], dtype=jnp.float16))
             
             state, loss = train_step(state, batch_np)
             epoch_loss += float(loss)
             count += 1
+        
         avg_loss = epoch_loss / count
         epoch_losses.append(avg_loss)
         print(f"\nEpoch {epoch} | Average Loss: {avg_loss:.4f}")
 
+        # ✅ Move memory clearing outside the batch loop
+        gc.collect()
+        jax.clear_backends()
+    
     # Save loss plot instead of blocking execution
     plt.plot(range(1, config['epochs'] + 1), epoch_losses, marker='o')
     plt.xlabel("Epoch")
