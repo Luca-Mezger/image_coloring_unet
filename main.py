@@ -2,15 +2,18 @@ import os
 
 # Reduce JAX GPU memory usage
 os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"  # Disable preallocation
-os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.5"  # Use only 50% of available GPU memory
+os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.8"  # Use only 80% of available GPU memory
 os.environ["TF_FORCE_UNIFIED_MEMORY"] = "1"  # Allows memory sharing between CPU/GPU
 os.environ["XLA_FLAGS"] = "--xla_gpu_strict_conv_algorithm_picker=false"
-# Force JAX to use deterministic convolution algorithms (faster)
+
+import os
+
 os.environ["XLA_FLAGS"] = (
-    "--xla_gpu_conv_algorithm_picker=0 "
     "--xla_gpu_autotune_level=2 "
-    "--xla_gpu_strict_conv_algorithm_picker=false"
+    "--xla_gpu_force_compilation_parallelism=1 "
+    "--xla_gpu_enable_triton_gemm=false"
 )
+
 
 import argparse
 from train import train
