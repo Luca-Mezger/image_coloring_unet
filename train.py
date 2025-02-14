@@ -34,7 +34,7 @@ def train(config):
     ]
     total_batches = math.ceil(len(file_list) / config['batch_size'])
 
-    dataset = load_dataset(batch_size=config['batch_size'], prefetch=False)  # Lazy loading
+    dataset = load_dataset(batch_size=config['batch_size'])
 
     # Initialize model & training state
     model = create_model()
