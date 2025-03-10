@@ -38,10 +38,10 @@ class UpBlock(nn.Module):
 
 class UNet(nn.Module):
     """
-    Full UNet for image colorization.
+    Full UNet for image colorization in Lab color space.
     
-    Input: Grayscale image with shape (batch, H, W, 1)
-    Output: Color image with shape (batch, H, W, 3)
+    Input: Grayscale image (L channel) with shape (batch, H, W, 1)
+    Output: ab channels with shape (batch, H, W, 2)
     """
     @nn.compact
     def __call__(self, x):
@@ -63,8 +63,8 @@ class UNet(nn.Module):
         x = UpBlock(features=128)(x, skip2)         # (B, H/2, W/2, 128)
         x = UpBlock(features=64)(x, skip1)          # (B, H, W, 64)
         
-        # Final 1x1 convolution to produce 3-channel RGB output
-        x = nn.Conv(3, kernel_size=(1, 1), padding='SAME')(x)
+        # Final 1x1 convolution to produce ab channels
+        x = nn.Conv(2, kernel_size=(1, 1), padding='SAME')(x)
         # Use tanh to map outputs to [-1, 1]
         return jnp.tanh(x)
 

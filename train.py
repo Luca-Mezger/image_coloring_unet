@@ -15,9 +15,10 @@ class TrainState(train_state.TrainState):
     pass
 
 def loss_fn(params, apply_fn, batch):
-    grayscale, target = batch
-    pred = apply_fn({'params': params}, grayscale)
-    return jnp.mean(jnp.abs(pred - target))
+    # L channel input and ab channels target (Lab color space)
+    L, ab_target = batch
+    pred_ab = apply_fn({'params': params}, L)
+    return jnp.mean(jnp.abs(pred_ab - ab_target))
 
 @jax.jit
 def train_step(state, batch):
@@ -40,7 +41,7 @@ def train(config):
     model = create_model()
     rng = jax.random.PRNGKey(config['seed'])
     rng, init_rng = jax.random.split(rng)
-    input_shape = (1, config['img_size'], config['img_size'], 1)
+    input_shape = (1, config['img_size'], config['img_size'], 1)  # L channel input
     params = model.init(init_rng, jnp.ones(input_shape, dtype=jnp.float16))['params']  # Use float16
     tx = optax.adam(config['learning_rate'])
     state = TrainState.create(apply_fn=model.apply, params=params, tx=tx)
@@ -51,7 +52,6 @@ def train(config):
         for batch in tqdm(dataset.take(total_batches), desc=f"Epoch {epoch}", total=total_batches, unit="batch"):
             # Convert to float16 to reduce memory usage
             batch_np = (jnp.asarray(batch[0], dtype=jnp.float16), jnp.asarray(batch[1], dtype=jnp.float16))
-            
             state, loss = train_step(state, batch_np)
             epoch_loss += float(loss)
             count += 1
@@ -60,11 +60,11 @@ def train(config):
         epoch_losses.append(avg_loss)
         print(f"\nEpoch {epoch} | Average Loss: {avg_loss:.4f}")
 
-        # ✅ Move memory clearing outside the batch loop
+        # Clear memory after each epoch
         gc.collect()
         jax.clear_backends()
     
-    # Save loss plot instead of blocking execution
+    # Save loss plot
     plt.plot(range(1, config['epochs'] + 1), epoch_losses, marker='o')
     plt.xlabel("Epoch")
     plt.ylabel("Average Loss")

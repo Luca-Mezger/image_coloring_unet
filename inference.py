@@ -8,44 +8,79 @@ import numpy as np
 from train import TrainState
 from flax import serialization
 from skimage.transform import resize
+from skimage import color
 
 def load_checkpoint(state, filepath):
     with open(filepath, "rb") as f:
         state = serialization.from_bytes(state, f.read())
     return state
 
-def colorize_image(state, grayscale_image):
+def preprocess_grayscale_image(image, img_size):
     """
-    Colorize a single grayscale image.
+    Preprocess the input image:
+    - Normalize to [0, 1].
+    - If grayscale, replicate channels to form a pseudo-RGB image.
+    - Resize to the target image size.
+    - Convert to Lab and extract the L channel.
+    - Normalize L to [-1, 1] as (L/50) - 1.
+    
+    Returns:
+        L_norm: Normalized L channel (H, W) in [-1, 1].
+        L_orig: Original L channel (H, W) from Lab.
+    """
+    if image.dtype != np.float32:
+        image = image.astype(np.float32) / 255.0
+    if image.ndim == 2:
+        image = np.stack([image, image, image], axis=-1)
+    elif image.ndim == 3 and image.shape[-1] == 1:
+        image = np.repeat(image, 3, axis=-1)
+    if image.shape[0] != img_size or image.shape[1] != img_size:
+        image = resize(image, (img_size, img_size), anti_aliasing=True)
+    lab = color.rgb2lab(image)
+    L = lab[..., 0]
+    L_norm = (L / 50.0) - 1.0
+    return L_norm, L
+
+def colorize_image(state, image, img_size):
+    """
+    Colorize an image by predicting ab channels from the normalized L channel.
     
     Args:
         state: Trained model state.
-        grayscale_image: Array of shape (H, W, 1) or (1, H, W, 1).
+        image: Input image array.
+        img_size: Image size used during training.
+    
     Returns:
-        Colorized image of shape (H, W, 3).
+        Tuple (L_orig, colorized_rgb): The original L channel and the reconstructed RGB image.
     """
+    L_norm, L_orig = preprocess_grayscale_image(image, img_size)
+    # Prepare input: add batch and channel dimensions.
+    L_norm_batch = jnp.array(L_norm)[None, ..., None]
     model = create_model()
-    # Ensure the image has a batch dimension.
-    if grayscale_image.ndim == 3:
-        grayscale_image = jnp.expand_dims(grayscale_image, axis=0)
-    pred = model.apply({'params': state.params}, grayscale_image)
-    return jnp.squeeze(pred, axis=0)
+    pred_ab = model.apply({'params': state.params}, L_norm_batch)
+    pred_ab = np.array(jnp.squeeze(pred_ab, axis=0))  # Shape: (H, W, 2)
+    # Denormalize ab channels.
+    pred_ab_denorm = pred_ab * 128.0
+    # Combine the original L channel with the predicted ab channels.
+    lab_image = np.concatenate([L_orig[..., None], pred_ab_denorm], axis=-1)
+    # Convert the Lab image to RGB.
+    rgb_image = color.lab2rgb(lab_image)
+    return L_orig, rgb_image
 
-def visualize(grayscale, colorized):
+def visualize(L_channel, colorized_rgb):
     """
-    Display grayscale and colorized images side by side.
+    Display the input L channel and the colorized RGB image side by side.
     """
     fig, axes = plt.subplots(1, 2, figsize=(10, 5))
-    axes[0].imshow(grayscale.squeeze(), cmap='gray')
-    axes[0].set_title('Grayscale')
-    # Assuming tanh activation outputs values in [-1, 1], rescale to [0, 1].
-    axes[1].imshow((colorized + 1) / 2)
+    axes[0].imshow(L_channel / 100.0, cmap='gray')
+    axes[0].set_title('Input L Channel')
+    axes[1].imshow(colorized_rgb)
     axes[1].set_title('Colorized')
     plt.show()
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Run inference on a grayscale image using the trained UNet model."
+        description="Run inference using the trained UNet model to predict ab channels from the L channel."
     )
     parser.add_argument(
         "--checkpoint",
@@ -73,7 +108,6 @@ def main():
     rng = jax.random.PRNGKey(0)
     params = model.init(rng, dummy_input)['params']
     print("Initialized dummy model parameters")
-    # Create a TrainState with the initialized parameters.
     state = TrainState(
         step=0,
         apply_fn=model.apply,
@@ -83,30 +117,18 @@ def main():
     )
     state = load_checkpoint(state, args.checkpoint)
     print(f"Loaded model checkpoint from {args.checkpoint}")
+    
     # Load the input image.
     img = imageio.imread(args.input)
     print(f"Loaded image with shape {img.shape}")
-    # Convert to grayscale if necessary.
-    if img.ndim == 3:
-        img = np.mean(img, axis=2)
-    print(f"Converted to grayscale")
-    # Ensure shape is (H, W, 1).
-    if img.ndim == 2:
-        img = np.expand_dims(img, axis=-1)
-    # Normalize the image to [0, 1] if it's not already float.
-    if img.dtype != np.float32:
-        img = img.astype(np.float32) / 255.0
-    # Resize if needed.
-    if img.shape[0] != args.img_size or img.shape[1] != args.img_size:
-        img = resize(img, (args.img_size, args.img_size), anti_aliasing=True)
-    grayscale_image = jnp.array(img, dtype=jnp.float32)
-
-    print(f"Processed image with shape {grayscale_image.shape}")
-
-    # Run inference.
-    colorized = colorize_image(state, grayscale_image)
+    if img.ndim == 3 and img.shape[-1] == 3:
+        print("Using color image to extract L channel.")
+    else:
+        print("Using grayscale image.")
+    
+    L_channel, colorized = colorize_image(state, img, args.img_size)
     print(f"Colorized image with shape {colorized.shape}")
-    visualize(grayscale_image, colorized)
+    visualize(L_channel, colorized)
 
 if __name__ == "__main__":
     main()
