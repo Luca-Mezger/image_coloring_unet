@@ -19,7 +19,7 @@ chmod +x setup.sh
 ./setup.sh 
 ```
 
-### Usage
+## Usage
 You need sufficiently powerful hardware to train the model effectively.
 1. Check if JAX recognises and is able to use your GPU. Training with a CPU is theoretically possible but no usable results will be achieved in reasonable time.
 ```bash
@@ -59,3 +59,21 @@ python inference.py --checkpoint checkpoints/model.pkl --input test/image_4_blac
 ```bash
 python inference.py --help
 ```
+
+## File Structure
+📂 data
+📄 .gitignore
+📄 check_jax_gpu.py
+📄 config.py
+📄 datasets.py
+📄 enhance_saturation.py
+📄 eval.py
+📄 inference.py
+📄 main.py
+📄 model.py
+📄 readme.md
+📄 requirements.txt
+📄 setup.bat
+📄 setup.sh
+📄 train.py
+📄 utils.py
