@@ -62,7 +62,8 @@ def train(config):
 
         # Clear memory after each epoch
         gc.collect()
-        jax.clear_backends()
+        jax.clear_caches()
+
     
     # Save loss plot
     plt.plot(range(1, config['epochs'] + 1), epoch_losses, marker='o')
