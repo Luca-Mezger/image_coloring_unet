@@ -11,7 +11,7 @@ cd image_coloring_unet
 
 ### Windows
 - Run `setup.bat` (double-click it or execute via Command Prompt). This will create a virtual environment and install all dependencies.
-- ```bash
+```bash
 source venv/bin/activate
 ```
 
