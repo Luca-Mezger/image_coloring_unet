@@ -27,4 +27,4 @@ pip install -r requirements.txt
 
 echo
 echo "Setup complete."
-echo "To activate the environment, run: source venv/bin/activate"
+# echo "To activate the environment, run: source venv/bin/activate"

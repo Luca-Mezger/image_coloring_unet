@@ -1,14 +1,14 @@
-jax
-jaxlib
-flax
-optax
-tensorflow-datasets
-tensorflow
-torchvision
-torch
-matplotlib
-numpy
-tqdm
-imageio
-scikit-image
-Pillow
+flax==0.10.2
+imageio==2.37.0
+jax==0.5.0
+jaxlib==[latest]  # Add if needed
+matplotlib==3.8.3
+numpy==1.26.4     # Downgrade from 2.2.4 (unless you need beta)
+optax==0.2.4
+Pillow==10.1.0
+scikit-image==0.22.0  # Replaces invalid skimage==0.0
+tensorflow==2.18.0
+tensorflow-datasets==[latest]  # Add if needed
+torch==2.6.0
+torchvision==0.21.0
+tqdm==4.67.1

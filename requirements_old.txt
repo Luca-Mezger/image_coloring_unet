@@ -1,0 +1,14 @@
+jax
+jaxlib
+flax
+optax
+tensorflow-datasets
+tensorflow
+torchvision
+torch
+matplotlib
+numpy
+tqdm
+imageio
+scikit-image
+Pillow
