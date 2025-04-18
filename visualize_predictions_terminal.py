@@ -6,54 +6,54 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from flax import serialization
-from model import create_model
-from train import TrainState
 from skimage import color, io
 from skimage.transform import resize
-from PIL import Image as PILImage
-from rich.console import Console
-from rich.columns import Columns
-from rich.image import Image as RichImage
+from model import create_model
+from train import TrainState
 
-def load_checkpoint(state, filepath):
-    with open(filepath, "rb") as f:
-        state = serialization.from_bytes(state, f.read())
-    return state
+# ASCII shades from dark to light
+_ASCII_CHARS = "@%#*+=-:. "
 
-def preprocess_image(image, img_size):
-    # normalize & resize
+def load_checkpoint(state, path):
+    with open(path, "rb") as f:
+        return serialization.from_bytes(state, f.read())
+
+def preprocess(image, img_size):
+    # normalize & ensure 3‑channel
     if image.dtype != np.float32:
         image = image.astype(np.float32) / 255.0
     if image.ndim == 2:
         image = np.stack([image]*3, axis=-1)
-    elif image.ndim == 3 and image.shape[-1] == 1:
-        image = np.repeat(image, 3, axis=-1)
     if image.shape[:2] != (img_size, img_size):
         image = resize(image, (img_size, img_size), anti_aliasing=True)
-    # to Lab
     lab = color.rgb2lab(image)
-    L = lab[..., 0]
-    ab = lab[..., 1:]
-    L_norm = (L / 50.0) - 1.0
+    L, ab = lab[...,0], lab[...,1:]
+    L_norm = (L/50.0) - 1.0
     ab_norm = ab / 128.0
     return L_norm, ab_norm, L, ab
 
-def colorize(model, params, L_norm):
-    L_batch = jnp.array(L_norm)[None, ..., None]
-    pred_ab = model.apply({'params': params}, L_batch)
-    pred_ab = np.squeeze(np.array(pred_ab), axis=0) * 128.0
-    return pred_ab
+def predict_ab(model, params, L_norm):
+    inp = jnp.array(L_norm)[None,...,None]
+    pred = model.apply({'params': params}, inp)
+    return np.squeeze(np.array(pred), 0) * 128.0  # back to ab-scale
 
-def to_pil_gray(L):
-    # L in [0,100] → scale to [0,255]
-    gray = np.clip((L / 100.0 * 255), 0, 255).astype(np.uint8)
-    return PILImage.fromarray(gray, mode="L")
+def to_ascii_lines(gray2d, width=32):
+    # scale to [0,255]
+    p = gray2d.astype(np.float32)
+    p = (p - p.min()) / max(p.max()-p.min(), 1e-6) * 255
+    # resize to square block
+    block = resize(p, (width, width), anti_aliasing=True)
+    chars = _ASCII_CHARS
+    m = len(chars)-1
+    lines = []
+    for row in block:
+        line = "".join(chars[int(val/255*m)] for val in row)
+        lines.append(line)
+    return lines
 
-def to_pil_rgb(L, ab):
-    lab = np.concatenate([L[..., None], ab], axis=-1)
-    rgb = np.clip(color.lab2rgb(lab), 0, 1)
-    rgb_uint8 = (rgb * 255).astype(np.uint8)
-    return PILImage.fromarray(rgb_uint8, mode="RGB")
+def rgb_to_gray(rgb):
+    # simple luminance
+    return 0.299*rgb[...,0] + 0.587*rgb[...,1] + 0.114*rgb[...,2]
 
 def main():
     p = argparse.ArgumentParser()
@@ -62,43 +62,44 @@ def main():
     p.add_argument("--img_size",    type=int, default=64)
     args = p.parse_args()
 
-    # init model + state
+    # init model & state
     model = create_model()
     dummy = jnp.ones((1, args.img_size, args.img_size, 1))
     params = model.init(jax.random.PRNGKey(0), dummy)["params"]
-    state = TrainState(step=0, apply_fn=model.apply, params=params, tx=None, opt_state=None)
+    state = TrainState(step=0, apply_fn=model.apply,
+                       params=params, tx=None, opt_state=None)
     state = load_checkpoint(state, args.checkpoint)
 
     # pick 10 random files
-    imgs = [
-        f for f in os.listdir(args.data_dir)
-        if f.lower().endswith((".jpg",".jpeg",".png"))
-    ]
-    selection = random.sample(imgs, k=10)
+    files = [f for f in os.listdir(args.data_dir)
+             if f.lower().endswith((".jpg",".jpeg",".png"))]
+    pick = random.sample(files, k=10)
 
-    console = Console()
-    panels = []
-    for fname in selection:
+    for fname in pick:
         path = os.path.join(args.data_dir, fname)
-        raw = io.imread(path)
-        L_norm, ab_norm, L_orig, ab_orig = preprocess_image(raw, args.img_size)
-        pred_ab = colorize(model, state.params, L_norm)
+        img  = io.imread(path)
+        Ln, abn, L, ab = preprocess(img, args.img_size)
+        pred_ab = predict_ab(model, state.params, Ln)
 
-        pil_gray      = to_pil_gray(L_orig)
-        pil_gt        = to_pil_rgb(L_orig, ab_orig)
-        pil_pred      = to_pil_rgb(L_orig, pred_ab)
+        # raw RGBs
+        gt_rgb   = np.clip(color.lab2rgb(np.stack([L,ab[...,0],ab[...,1]],-1)),0,1)
+        pred_rgb = np.clip(color.lab2rgb(np.stack([L,pred_ab[...,0],pred_ab[...,1]],-1)),0,1)
 
-        # wrap with RichImage
-        rich_gray = RichImage.from_pil(pil_gray, width=20)
-        rich_gt   = RichImage.from_pil(pil_gt,   width=20)
-        rich_pred = RichImage.from_pil(pil_pred, width=20)
+        # create grayscale brightness maps
+        gray_in  = L/100.0       # L channel [0,100] → [0,1]
+        gray_gt  = rgb_to_gray(gt_rgb)
+        gray_pred= rgb_to_gray(pred_rgb)
 
-        panels.append(Columns([rich_gray, rich_gt, rich_pred], equal=True, expand=True))
+        # ascii
+        A_in   = to_ascii_lines(gray_in)
+        A_gt   = to_ascii_lines(gray_gt)
+        A_pred = to_ascii_lines(gray_pred)
 
-    # print filename header + images
-    for fname, col in zip(selection, panels):
-        console.rule(f"[bold]{fname}")
-        console.print(col)
+        print(f"\n=== {fname} ===\n")
+        for row_in, row_gt, row_pr in zip(A_in, A_gt, A_pred):
+            # side-by-side with a space between
+            print(f"{row_in}  {row_gt}  {row_pr}")
+    print()
 
 if __name__ == "__main__":
     main()

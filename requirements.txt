@@ -12,3 +12,5 @@ tensorflow-datasets==[latest]  # Add if needed
 torch==2.6.0
 torchvision==0.21.0
 tqdm==4.67.1
+rich==13.3.5
+
