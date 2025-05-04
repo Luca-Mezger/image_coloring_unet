@@ -1,8 +1,8 @@
 @echo off
-REM Check if Python is installed
-python --version >nul 2>&1
+REM Check if Python 3.10 is installed using the 'py' launcher
+py -3.10 --version >nul 2>&1
 if errorlevel 1 (
-    echo Python is not installed. Please install Python3 and add it to your PATH.
+    echo Python 3.10 is not installed. Please install Python 3.10 and add it to your PATH.
     pause
     exit /b 1
 )
@@ -10,7 +10,7 @@ if errorlevel 1 (
 REM Create virtual environment if it doesn't exist
 if not exist "venv" (
     echo Creating virtual environment...
-    python -m venv venv
+    py -3.10 -m venv venv
 )
 
 REM Activate the virtual environment
