@@ -11,7 +11,15 @@ import os
 #    "--xla_gpu_force_compilation_parallelism=1 "
 #    "--xla_gpu_enable_triton_gemm=false"
 #)
-
+os.environ["XLA_PYTHON_CLIENT_PREALLOCATE"] = "false"
+os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = "0.8"
+os.environ["TF_FORCE_UNIFIED_MEMORY"] = "1"
+os.environ["XLA_FLAGS"] = (
+    "--xla_gpu_strict_conv_algorithm_picker=false "
+    "--xla_gpu_autotune_level=2 "
+    "--xla_gpu_force_compilation_parallelism=1 "
+    "--xla_gpu_enable_triton_gemm=false"
+)
 
 import argparse
 from train import train
