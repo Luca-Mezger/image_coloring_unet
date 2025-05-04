@@ -16,3 +16,16 @@ def load_checkpoint(state, filepath):
     else:
         print(f"No checkpoint found at {filepath}")
         return state
+    
+def save_metrics(metrics: dict, checkpoint_path: str) -> None:
+    """
+    Write metrics to '<checkpoint_stem>_metrics.txt' next to the .pkl file.
+    Lists are serialized as comma‑separated values.
+    """
+    txt_path = os.path.splitext(checkpoint_path)[0] + "_metrics.txt"
+    with open(txt_path, "w", encoding="utf-8") as f:
+        for k, v in metrics.items():
+            if isinstance(v, list):
+                v = ",".join(f"{x:.6f}" if isinstance(x, float) else str(x) for x in v)
+            f.write(f"{k}: {v}\n")
+    print(f"Metrics saved to {txt_path}")
