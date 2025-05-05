@@ -64,6 +64,14 @@ python inference.py --checkpoint checkpoints/model.pkl --input test/image_4_blac
 python inference.py --help
 ```
 
+## Webapp
+Specify the Model used in inference.py
+```bash
+python app.py
+```
+Open http://127.0.0.1:5000/
+
+
 ## File Structure
 📂 data
 📄 .gitignore
