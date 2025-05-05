@@ -79,6 +79,12 @@ Open http://127.0.0.1:5000/
   <img src="assets/kapuziner.png" alt="Demo – grayscale vs. colourised" width="600"/>
 </p>
 
+## ToDo
+ToDo:
+    - Proper Training with Hyperparameter tuning
+    - Test and Eval dataset
+    - Better and more datasets (STL10 not optimal for coloring task)
+
 ## File Structure
 📂 data
 📄 .gitignore
