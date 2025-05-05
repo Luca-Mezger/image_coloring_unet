@@ -75,6 +75,9 @@ Open http://127.0.0.1:5000/
 <p align="center">
   <img src="assets/lion.png" alt="Demo – grayscale vs. colourised" width="600"/>
 </p>
+<p align="center">
+  <img src="assets/kapuziner.png" alt="Demo – grayscale vs. colourised" width="600"/>
+</p>
 
 ## File Structure
 📂 data
