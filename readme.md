@@ -71,6 +71,10 @@ python app.py
 ```
 Open http://127.0.0.1:5000/
 
+## Demo
+<p align="center">
+  <img src="assets/lion.png" alt="Demo – grayscale vs. colourised" width="600"/>
+</p>
 
 ## File Structure
 📂 data

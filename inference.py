@@ -23,24 +23,33 @@ def load_checkpoint(state, filepath):
 
 
 def preprocess_grayscale_image(image, img_size):
-    """
-    Preprocess the input image:
-    - Normalize to [0, 1].
-    - If grayscale, replicate channels to form a pseudo‑RGB image.
-    - Resize to the target image size.
-    - Convert to Lab and extract the L channel.
-    - Normalize L to [-1, 1]  as (L/50) - 1.
-    """
+    # normalise to [0,1]
     if image.dtype != np.float32:
         image = image.astype(np.float32) / 255.0
+
+    # ensure 3 channels
     if image.ndim == 2:
-        image = np.stack([image, image, image], axis=-1)
+        image = np.stack([image]*3, axis=-1)
     elif image.ndim == 3 and image.shape[-1] == 1:
         image = np.repeat(image, 3, axis=-1)
-    if image.shape[0] != img_size or image.shape[1] != img_size:
+
+    # centre‑crop to square (keeps aspect, no stretch)
+    h, w = image.shape[:2]
+    if h != w:
+        if h > w:                                # portrait
+            top = (h - w) // 2
+            image = image[top:top+w, :, :]
+        else:                                    # landscape
+            left = (w - h) // 2
+            image = image[:, left:left+h, :]
+
+    # scale to model size
+    if image.shape[0] != img_size:
         image = resize(image, (img_size, img_size), anti_aliasing=True)
-    lab  = color.rgb2lab(image)
-    L    = lab[..., 0]
+
+    # Lab conversion → L channel
+    lab = color.rgb2lab(image)
+    L   = lab[..., 0]
     L_norm = (L / 50.0) - 1.0
     return L_norm, L
 
