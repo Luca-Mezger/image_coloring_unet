@@ -37,3 +37,5 @@ checkpoints/
 test/
 data/*.pkl
 data/*.png
+data/*.jpg
+data/*.jpeg
