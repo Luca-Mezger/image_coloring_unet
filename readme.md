@@ -29,10 +29,12 @@ You need sufficiently powerful hardware to train the model effectively.
 ```bash
 python check_jax_gpu.py
 ```
-2. If Jax falls back to CPU you need to install Cuda enabled Jax and Jaxlib.
+2. If Jax falls back to CPU you need to install Cuda enabled Jax and Jaxlib. For cuda 11 you have to change the 12 to 11.
 ```bash
 pip uninstall -y jax jaxlib
-pip install --upgrade --find-links https://storage.googleapis.com/jax-releases/jax_cuda_releases.html jax[cuda]
+pip install --upgrade pip
+pip install "jax[cuda12_pip]" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
 ```
 3. run get_images.py
 You can specify the parameters either through the get_images.py file directly or through argparse:
